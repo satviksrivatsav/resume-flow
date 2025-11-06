@@ -25,7 +25,6 @@ const FONT_SIZES = [
 
 const DOCUMENT_SIZES = [
   { value: "a4" as const, label: "A4", subtitle: "8.27 x 11.69 in" },
-  { value: "legal" as const, label: "Legal", subtitle: "8.5 x 14 in" },
 ];
 
 export const ResumeSettings = () => {
@@ -160,29 +159,6 @@ export const ResumeSettings = () => {
               }`}
             >
               {size.label}
-            </motion.button>
-          ))}
-        </div>
-      </div>
-
-      {/* Document Size */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium">Document Size</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {DOCUMENT_SIZES.map((size) => (
-            <motion.button
-              key={size.value}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => updateSettings({ documentSize: size.value })}
-              className={`px-4 py-3 rounded-md border-2 text-sm font-medium transition-all ${
-                settings.documentSize === size.value
-                  ? 'border-primary bg-primary text-primary-foreground shadow-md'
-                  : 'border-border bg-background hover:border-primary/50'
-              }`}
-            >
-              <div>{size.label}</div>
-              <div className="text-xs opacity-80">{size.subtitle}</div>
             </motion.button>
           ))}
         </div>
