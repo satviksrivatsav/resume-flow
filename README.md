@@ -4,9 +4,9 @@ An intuitive, modern, and AI-powered resume builder ecosystem designed to stream
 
 ---
 
-## Key Features 🌟
+## 🌟 Key Features
 
-### The Intelligent Builder 🎨
+### 🎨 The Intelligent Builder
 *   **Real-Time High-Fidelity Preview:** Utilizes `@react-pdf/renderer` for dynamic PDF generation and `react-pdf` (powered by `pdf.js`) for browser-side rendering.
 *   **Adaptive View Modes:** Includes **Fit Width** and **Fit Height** modes with precise zoom controls (50% to 150%) and an immersive fullscreen mode.
 *   **Dynamic Content Management:** Seamlessly reorganize sections using a vertical drag-and-drop interface powered by `@dnd-kit`.
@@ -14,10 +14,10 @@ An intuitive, modern, and AI-powered resume builder ecosystem designed to stream
 *   **Professional Theme Engine:** Curated color grids, custom hex pickers, and 10+ professional font pairings.
 *   **Rich Text Integration:** Uses **Tiptap** for clean, semantic HTML editing in summaries and descriptions.
 
-### Deep Intelligence Engine 🧠
+### 🧠 Deep Intelligence Engine
 The core of Resume Flow is a sophisticated intelligence engine powered by **Groq (Llama 3.3/3.1)** and custom extraction pipelines.
 
-#### A. Resume Parser (The Ingestion Engine) 📄
+#### 📄 A. Resume Parser (The Ingestion Engine)
 Converts unstructured documents (PDF, DOCX, Images) into a strict, frontend-compatible JSON schema using layout-aware extraction and vision fallback.
 
 ```mermaid
@@ -44,7 +44,7 @@ graph TD
     O --> P[Return ResumeData JSON]
 ```
 
-#### B. AI Writer (Content Architect) ✍️
+#### ✍️ B. AI Writer (Content Architect)
 Provides contextual generation for professional summaries and impactful bullet points, maintaining consistency across the entire resume.
 
 ```mermaid
@@ -57,7 +57,7 @@ graph TD
     F --> G[Accept & Insert into Tiptap Editor]
 ```
 
-#### C. AI Tailor (Strategic Optimizer) 🎯
+#### 🎯 C. AI Tailor (Strategic Optimizer)
 Automatically adjusts resume content to target specific job roles using the STAR method, with a strict "Zero Hallucination" policy.
 
 ```mermaid
@@ -71,7 +71,7 @@ graph TD
     G --> H[Finalize & Commit to Resume Store]
 ```
 
-#### D. ATS Optimizer (Match Intelligence) 🔍
+#### 🔍 D. ATS Optimizer (Match Intelligence)
 A 9-category weighted scoring algorithm that identifies keyword gaps and formatting risks.
 
 ```mermaid
@@ -86,7 +86,32 @@ graph TD
 
 ---
 
-## Ecosystem Architecture 🏗️
+## 📖 API Reference
+
+### 1. Resume Parsing
+`POST /api/v1/resume/parse`
+- **Input:** `multipart/form-data` (PDF, DOCX, or Image).
+- **Process:** Extraction -> Vision OCR Fallback -> Llama 3.3 Structuring.
+- **Output:** `ResumeData` JSON object.
+
+### 2. Contextual Field Writing
+`POST /api/v1/resume/field`
+- **Input:** `current_value`, `instruction`, `tone`, `resume_context`.
+- **Output:** AI-optimized text string.
+
+### 3. Job Tailoring
+`POST /api/v1/resume/tailor`
+- **Input:** `resume_data`, `job_description`.
+- **Output:** Array of "Tailored Slides" (Diffs) for user review.
+
+### 4. ATS Analysis
+`POST /api/v1/ats/analyze`
+- **Input:** `resume_data`, `job_description` (optional).
+- **Output:** `AtsReport` including category scores (0-100) and keyword gaps.
+
+---
+
+## 🏗️ Ecosystem Architecture
 
 ```mermaid
 graph TD
@@ -98,50 +123,56 @@ graph TD
     AI --> Log[Logfire<br/>Observability]
 ```
 
+### Infrastructure (Supabase)
+- **Database:** Stores `resumes`, `profiles`, and `ats_reports` (JSONB).
+- **Authentication:** Email/Password and Social providers.
+- **Storage:** `resume-thumbnails` bucket (Public) for dashboard visual previews.
+
 ---
 
-## Integrated Tech Stack 🛠️
+## 🛠️ Integrated Tech Stack
 
 ### Frontend (`resume-flow-ui`)
 - **Framework:** React 18, Vite, TypeScript
-- **Rich Text:** Tiptap
+- **Rich Text:** Tiptap (Semantic HTML)
 - **Styling:** Tailwind CSS, Framer Motion
 - **State:** Zustand, React Query
-- **PDF:** @react-pdf/renderer
+- **PDF:** @react-pdf/renderer, pdf.js
 
 ### AI Service (`resume-flow-ai`)
 - **Backend:** Python 3.12+, FastAPI
-- **Extraction:** PyMuPDF, python-docx
+- **Extraction:** PyMuPDF (fitz), python-docx
 - **Inference:** Groq Cloud (Llama 3.3/3.1)
 - **Observability:** Logfire
 
 ---
 
-## Unified Quick Start 🚀
-
-To run the full suite locally, follow these steps.
+## 🚀 Unified Quick Start
 
 ### 1. Prerequisites
 - **Node.js** (v18+)
 - **Python** (v3.12+) & [uv](https://docs.astral.sh/uv/)
-- **Groq API Key** & **Logfire Token**
-- **Supabase Account**
+- **Groq API Key**
+- **Supabase Project**
 
-### 2. Environment Setup
+### 2. Unified Environment Configuration
 
-**Frontend (`resume-flow-ui/.env`):**
+Create the following files in their respective directories:
+
+**`resume-flow-ui/.env`**
 ```env
-VITE_SUPABASE_URL=your_url
-VITE_SUPABASE_ANON_KEY=your_key
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_AI_SERVICE_URL=http://localhost:8001
 ```
 
-**AI Service (`resume-flow-ai/.env`):**
+**`resume-flow-ai/.env`**
 ```env
-GROQ_API_KEY=your_key
+GROQ_API_KEY=gsk_your_key
 LOGFIRE_TOKEN=your_token
 ```
 
-### 3. Running the Application
+### 3. Execution
 
 **Start AI Service:**
 ```bash
@@ -159,5 +190,5 @@ npm run dev
 
 ---
 
-## License 📄
+## 📄 License
 Distributed under the MIT License. See LICENSE in the root directory for more information.
