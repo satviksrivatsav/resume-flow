@@ -123,6 +123,12 @@ graph TD
     AI --> Log[Logfire<br/>Observability]
 ```
 
+### Service Repositories
+| Service | Repository Link |
+| :--- | :--- |
+| **Frontend (UI)** | [satviksrivatsav/resume-flow-ui](https://github.com/satviksrivatsav/resume-flow-ui) |
+| **AI Service (API)** | [satviksrivatsav/resume-flow-ai](https://github.com/satviksrivatsav/resume-flow-ai) |
+
 ### Infrastructure (Supabase)
 - **Database:** Stores `resumes`, `profiles`, and `ats_reports` (JSONB).
 - **Authentication:** Email/Password and Social providers.
