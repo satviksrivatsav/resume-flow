@@ -1,0 +1,17 @@
+services:
+  # AI Microservice
+  resume-flow-ai:
+    build:
+      context: resume-flow-ai/
+    ports:
+      - 8001:8001
+    environment:
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+
+  # Frontend  
+  resume-flow-ui:
+    build:
+      context: resume-flow-ui/
+    ports:
+      - 8002:80

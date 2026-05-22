@@ -1,0 +1,11 @@
+# Directories
+supabase/
+node_modules/
+docs/
+.superpowers/
+.superpowers/
+.antigravitycli/
+
+# Sub Repos
+resume-flow-ui/
+resume-flow-ai/
