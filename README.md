@@ -11,25 +11,78 @@ An intuitive, modern, and AI-powered resume builder ecosystem designed to stream
 *   **Adaptive View Modes:** Includes **Fit Width** and **Fit Height** modes with precise zoom controls (50% to 150%) and an immersive fullscreen mode.
 *   **Dynamic Content Management:** Seamlessly reorganize sections using a vertical drag-and-drop interface powered by `@dnd-kit`.
 *   **Intelligent Auto-Save:** Background synchronization logic (30s interval) that upserts state to **Supabase**, paired with a local session-storage fallback.
-*   **Professional Theme Engine:** Curated color grids, custom hex pickers, and 10+ professional font pairings with granular line-height and typography controls.
-*   **Rich Text Integration:** Custom Quill-based editors for professional summaries and experience descriptions.
+*   **Professional Theme Engine:** Curated color grids, custom hex pickers, and 10+ professional font pairings.
+*   **Rich Text Integration:** Uses **Tiptap** for clean, semantic HTML editing in summaries and descriptions.
 
-### 🧠 AI Intelligence Suite
-*   **AI Resume Writer:** Surgical content generation for professional summaries and impactful bullet points.
-*   **AI Tailor:** Automatically adjust your resume content to target specific job roles with interactive side-by-side "Original vs. AI Improved" diffs.
-*   **AI Content Review:** Instant feedback on resume quality, clarity, and impact with recruiter simulation (6-second first impression).
-*   **Performance Backend:** Powered by the **Groq Inference API** (Llama 3.3/3.1) and **HuggingFace**, utilizing layout-aware PDF extraction.
+### 🧠 Intelligence Engine
+The core of Resume Flow is a sophisticated intelligence engine powered by **Groq (Llama 3.3/3.1)** and custom extraction pipelines.
 
-### 🔍 ATS Optimization Ecosystem
-*   **ATS Checker & Scoring:** Multi-dimensional scoring (0–100) across 9 categories: Formatting, Keywords, Experience, Impact, and more.
-*   **Keyword Intelligence:** Semantic identification of **Strong Keywords** vs. **Missing Keywords** required for target roles.
-*   **Risk Detection:** Technical analysis to identify formatting "Risks" that could hinder ATS readability.
-*   **Historical Reports:** Centralized storage of all analysis results in Supabase to monitor improvement over time.
+#### 📄 A. Resume Parser (The Ingestion Engine)
+Converts unstructured documents (PDF, DOCX, Images) into a strict, frontend-compatible JSON schema using layout-aware extraction and vision fallback.
 
-### 🗂️ Comprehensive Management
-*   **User Dashboard:** Manage multiple resumes with visual thumbnails (automatically synced to Supabase Storage).
-*   **Resume Import:** Upload existing PDFs and convert them into editable resumes via AI parsing.
-*   **Secure Authentication:** Robust user accounts and data persistence via **Supabase**.
+```mermaid
+graph TD
+    A[UploadFile] --> B{is_valid_resume_file?}
+    B -- No --> C[HTTP 400: Invalid File]
+    B -- Yes --> D{File Type?}
+    
+    D -- PDF --> E[PyMuPDF: Layout-Aware Block Extraction]
+    D -- DOCX --> F[python-docx: Paragraph & Table Extraction]
+    D -- Image --> G[Base64 Encode] --> H
+    
+    E --> I{Quality Check: Keywords & Length}
+    I -- Fail / Scanned --> J[PyMuPDF: Render PDF to PNGs] --> H[Groq Vision: Llama 4 Scout OCR]
+    I -- Pass --> K[Raw Text]
+    F --> K
+    H --> K
+    
+    K --> L{Final Quality Gate}
+    L -- Fail --> M[ValueError: Unreadable Resume]
+    L -- Pass --> N[Llama 3.3 70B: Structured JSON Mapping]
+    
+    N --> O[Pydantic Validation: UUIDs & Date Coercion]
+    O --> P[Return ResumeData JSON]
+```
+
+#### ✍️ B. AI Writer (Content Architect)
+Provides contextual generation for professional summaries and impactful bullet points, maintaining consistency across the entire resume.
+
+```mermaid
+graph TD
+    A[Trigger AI Writer] --> B[Collect User Instruction & Tone]
+    B --> C[Fetch Context: Full Resume Data]
+    C --> D[Groq: Llama 3.3 70B Generation]
+    D --> E[AI Review Modal: Side-by-Side Diff]
+    E --> F[User Refinement in Secondary Editor]
+    F --> G[Accept & Insert into Tiptap Editor]
+```
+
+#### 🎯 C. AI Tailor (Strategic Optimizer)
+Automatically adjusts resume content to target specific job roles using the STAR method, with a strict "Zero Hallucination" policy.
+
+```mermaid
+graph TD
+    A[User Inputs JD / Uploads File] --> B[JD Validation - Llama 3.1 8B]
+    B -- Valid --> C[Select Sections to Tailor]
+    C --> D[Tailoring Generation - Llama 3.3 70B]
+    D --> E[Filter & Map Results to Review Slides]
+    E --> F{TailorDiffModal: Compare Original vs. Tailored}
+    F --> G[User Action: Accept/Reject/Edit]
+    G --> H[Finalize & Commit to Resume Store]
+```
+
+#### 🔍 D. ATS Optimizer (Match Intelligence)
+A 9-category weighted scoring algorithm that identifies keyword gaps and formatting risks.
+
+```mermaid
+graph TD
+    A[Analysis Request] --> B[Sync Current Resume Content]
+    B --> C[Semantic Keyword Gap Extraction]
+    C --> D[Weighted Category Scoring Engine]
+    D --> E[Risk & Compliance Detection]
+    E --> F[Save Report to Supabase JSONB]
+    F --> G[Display Interactive Report Dashboard]
+```
 
 ---
 
@@ -41,14 +94,9 @@ graph TD
     UI <--> AI[resume-flow-ai<br/>Python/FastAPI]
     UI <--> DB[(Supabase<br/>Auth & DB)]
     
-    AI --> LLM[LLM API<br/>Groq/Llama-3.3]
-    AI --> PDF[PyMuPDF<br/>Text Extraction]
+    AI --> LLM[Groq Cloud<br/>Llama-3.3-70B]
+    AI --> Log[Logfire<br/>Observability]
 ```
-
-| Service | Description | Tech Stack | Repository |
-| :--- | :--- | :--- | :--- |
-| **Frontend** | Modern, interactive resume builder and dashboard. | React, Vite, Zustand, Tailwind | [View Service](./resume-flow-ui) |
-| **AI Service** | Intelligent parsing, rewriting, and ATS analysis engine. | Python, FastAPI, PyMuPDF | [satviksrivatsav/resume-flow-ai](https://github.com/satviksrivatsav/resume-flow-ai) |
 
 ---
 
@@ -56,20 +104,16 @@ graph TD
 
 ### Frontend (`resume-flow-ui`)
 - **Framework:** React 18, Vite, TypeScript
+- **Rich Text:** Tiptap
 - **Styling:** Tailwind CSS, Framer Motion
-- **Components:** Radix UI / shadcn/ui
 - **State:** Zustand, React Query
-- **PDF/Docx:** @react-pdf/renderer, docx, pdf.js
+- **PDF:** @react-pdf/renderer
 
 ### AI Service (`resume-flow-ai`)
 - **Backend:** Python 3.9+, FastAPI
-- **Extraction:** PyMuPDF (fitz)
-- **AI Models:** Llama 3.3/3.1 (via Groq/HuggingFace)
-- **Dependency Management:** [uv](https://docs.astral.sh/uv/)
-
-### Backend & Infrastructure
-- **Auth & Database:** Supabase
-- **Storage:** Supabase Storage (Resume Thumbnails)
+- **Extraction:** PyMuPDF, python-docx
+- **Inference:** Groq Cloud (Llama 3.3/3.1)
+- **Observability:** Logfire
 
 ---
 
@@ -79,31 +123,41 @@ To run the full suite locally, follow these steps.
 
 ### 1. Prerequisites
 - **Node.js** (v18+)
-- **Python** (v3.9+)
-- **HuggingFace / Groq Token** (Set in AI service `.env`)
-- **Supabase Account** (Set in UI service `.env`)
+- **Python** (v3.9+) & [uv](https://docs.astral.sh/uv/)
+- **Groq API Key** & **Logfire Token**
+- **Supabase Account**
 
-### 2. Installation & Running
+### 2. Environment Setup
 
-#### Frontend (UI)
+**Frontend (`resume-flow-ui/.env`):**
+```env
+VITE_SUPABASE_URL=your_url
+VITE_SUPABASE_ANON_KEY=your_key
+```
+
+**AI Service (`resume-flow-ai/.env`):**
+```env
+GROQ_API_KEY=your_key
+LOGFIRE_TOKEN=your_token
+```
+
+### 3. Running the Application
+
+**Start AI Service:**
+```bash
+cd resume-flow-ai
+uv sync
+uv run uvicorn app.main:app --reload --port 8001
+```
+
+**Start Frontend:**
 ```bash
 cd resume-flow-ui
 npm install
 npm run dev
 ```
 
-#### AI Service
-```bash
-# Clone the companion repository
-git clone https://github.com/satviksrivatsav/resume-flow-ai.git
-cd resume-flow-ai
-
-# Install dependencies and run
-uv sync
-uv run uvicorn app.main:app --reload
-```
-
 ---
 
 ## 📄 License
-Distributed under the MIT License. See `LICENSE` in the root directory for more information.
+Distributed under the MIT License. See LICENSE in the root directory for more information.
